@@ -3,6 +3,10 @@ package org.learn.axonframework.shipmentservice;
 import com.rabbitmq.client.Channel;
 import org.axonframework.amqp.eventhandling.DefaultAMQPMessageConverter;
 import org.axonframework.amqp.eventhandling.spring.SpringAMQPMessageSource;
+import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.SimpleCommandBus;
+import org.axonframework.common.transaction.TransactionManager;
+import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -39,6 +43,13 @@ public class ShipmentServiceApplication {
 	@Bean
 	public Binding orderBinding() {
 		return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("*").noargs();
+	}
+
+	@Bean
+	public CommandBus commandBus(TransactionManager transactionManager) {
+		SimpleCommandBus simpleCommandBus = new SimpleCommandBus();
+		simpleCommandBus.registerDispatchInterceptor(new TransactionDispatchInterceptor<>(transactionManager));
+		return simpleCommandBus;
 	}
 
 	@Autowired

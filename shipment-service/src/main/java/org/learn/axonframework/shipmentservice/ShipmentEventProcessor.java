@@ -41,7 +41,7 @@ public class ShipmentEventProcessor {
 
     @PostMapping
     public void whatever() {
-        commandGateway.send(new PrepareShipmentCommand(Util.generateId(), "4c0e3f77-8ad8-427e-8ec9-7e6eea545101", 20));
+        commandGateway.send(new PrepareShipmentCommand(Util.generateId(), "7d9162cb-9782-4a00-b67a-470f282cc0d5", 20));
     }
 
 

@@ -3,10 +3,9 @@ package org.learn.axonframework.shipmentservice;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
-import org.learn.axonframework.coreapi.ProductInfo;
 import org.learn.axonframework.coreapi.ShipmentRequestedEvent;
-import org.learn.axonframework.shipmentservice.model.Shipment;
-import org.learn.axonframework.shipmentservice.model.ShipmentRepository;
+import org.learn.axonframework.shipmentservice.model.PrepareShipmentCommand;
+import org.learn.axonframework.util.LoggingCallback;
 import org.learn.axonframework.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +21,6 @@ public class ShipmentEventHandler {
     @Autowired
     private CommandGateway commandGateway;
 
-    @Autowired
-    private ShipmentRepository repository;
-
-
     @EventHandler
     public void on(ShipmentRequestedEvent event) {
         log.info("on ShipmentRequestedEvent");
@@ -33,10 +28,8 @@ public class ShipmentEventHandler {
 
         //generate price for shipping
 
-//        commandGateway.send(new PrepareShipmentCommand(id, event.getOrderId(), 20), LoggingCallback.INSTANCE);
+        commandGateway.send(new PrepareShipmentCommand(id, event.getOrderId(), 20), LoggingCallback.INSTANCE);
 
-        ProductInfo info = event.getProductInfo();
-        repository.save(new Shipment(id, event.getOrderId(), info.getProductId(), info.getPrice()));
     }
 
 }
