@@ -7,6 +7,14 @@ axon:
   amqp:
     exchange: ShipmentEvents
 
+# H2DB
+spring:
+  datasource:
+    url: jdbc:h2:file:~/workspace/orderDB;DB_CLOSE_ON_EXIT=FALSE
+    username: test
+    password: test
+    driverClassName: org.h2.Driver
+
 # Spring properties
 #spring:
 #  application:

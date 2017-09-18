@@ -26,15 +26,15 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PreDestroy;
 
 //@EnableDiscoveryClient
 @SpringBootApplication
 public class OrderServiceApplication {
+
+	private SubscribingEventProcessor subscribingEventProcessor;
 
 	public static void main(String[] args) {
 		SpringApplication.run(OrderServiceApplication.class, args);
@@ -69,16 +69,14 @@ public class OrderServiceApplication {
 			@RabbitListener(queues = "OrderEvents")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
-				LoggerFactory.getLogger("AMQP").info("received message " + message);
 				super.onMessage(message, channel);
 			}
 		};
 	}
 
-
-	private SubscribingEventProcessor subscribingEventProcessor;
-
+	//the manual registration of saga event subscription because of processing events from AMQP queue
 	@Autowired
+	@SuppressWarnings("unchecked")
 	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
 	{
 		String simpleName = OrderManagementSaga.class.getSimpleName();

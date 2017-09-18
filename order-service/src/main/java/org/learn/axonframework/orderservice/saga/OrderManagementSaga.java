@@ -24,7 +24,6 @@ public class OrderManagementSaga {
 
         //request shipment
         log.info("sending RequestShipmentCommand");
-        log.info("orderId - " + event.getOrderId());
         commandGateway.send(new RequestShipmentCommand(event.getOrderId(), event.getProductInfo()));
 
         //create invoice
