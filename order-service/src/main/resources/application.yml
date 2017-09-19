@@ -7,6 +7,9 @@ axon:
   amqp:
     exchange: ShipmentEvents
 
+  distributed:
+    enabled: true
+
 # H2DB
 spring:
   datasource:
@@ -15,17 +18,15 @@ spring:
     password: test
     driverClassName: org.h2.Driver
 
-# Spring properties
-#spring:
-#  application:
-#     name: order-service
-#
-## Discovery Server Access
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:1111/eureka/
-#
-## HTTP Server
-#server:
-#  port: 2222   # HTTP (Tomcat) port
+  application:
+     name: order-service
+
+# Discovery Server Access
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1111/eureka/
+
+# HTTP Server
+server:
+  port: 2222   # HTTP (Tomcat) port

@@ -3,9 +3,12 @@ package org.learn.axonframework.orderservice.rest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.learn.axonframework.coreapi.FileOrderCommand;
 import org.learn.axonframework.coreapi.ProductInfo;
+import org.learn.axonframework.coreapi.TestCommand;
 import org.learn.axonframework.util.LoggingCallback;
 import org.learn.axonframework.util.Util;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,5 +30,11 @@ public class OrderController {
         commandGateway.send(new FileOrderCommand(orderId, productInfo), LoggingCallback.INSTANCE);
 
         return "Order posted - " + orderId;
+    }
+
+    @PatchMapping("/test")
+    public String testCommand() {
+        LoggerFactory.getLogger("TEST").info("sending test command");
+        commandGateway.send(new TestCommand("RandomName"));
     }
 }

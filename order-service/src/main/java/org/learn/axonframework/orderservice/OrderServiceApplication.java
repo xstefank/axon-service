@@ -3,6 +3,12 @@ package org.learn.axonframework.orderservice;
 import com.rabbitmq.client.Channel;
 import org.axonframework.amqp.eventhandling.DefaultAMQPMessageConverter;
 import org.axonframework.amqp.eventhandling.spring.SpringAMQPMessageSource;
+import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.SimpleCommandBus;
+import org.axonframework.commandhandling.distributed.AnnotationRoutingStrategy;
+import org.axonframework.commandhandling.distributed.CommandBusConnector;
+import org.axonframework.commandhandling.distributed.CommandRouter;
+import org.axonframework.commandhandling.distributed.DistributedCommandBus;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
 import org.axonframework.eventhandling.saga.AnnotatedSagaManager;
@@ -12,6 +18,8 @@ import org.axonframework.eventhandling.saga.repository.SagaStore;
 import org.axonframework.messaging.annotation.ParameterResolverFactory;
 import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
+import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
+import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.learn.axonframework.orderservice.saga.OrderManagementSaga;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -24,13 +32,18 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.web.client.RestOperations;
 
 import javax.annotation.PreDestroy;
 
-//@EnableDiscoveryClient
+@EnableDiscoveryClient
 @SpringBootApplication
 public class OrderServiceApplication {
 
@@ -95,4 +108,26 @@ public class OrderServiceApplication {
 	{
 		this.subscribingEventProcessor.shutDown();
 	}
+
+	//spring cloud settings - distributed command bus
+	// Example function providing a Spring Cloud Connector
+	@Bean
+	public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
+		return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());
+	}
+
+	@Bean
+	public CommandBusConnector springHttpCommandBusConnector(@Qualifier("localSegment") CommandBus localSegment,
+															 RestOperations restOperations,
+															 Serializer serializer) {
+		return new SpringHttpCommandBusConnector(localSegment, restOperations, serializer);
+	}
+
+	@Primary // to make sure this CommandBus implementation is used for autowiring
+	@Bean
+	public DistributedCommandBus springCloudDistributedCommandBus(CommandRouter commandRouter,
+																  CommandBusConnector commandBusConnector) {
+		return new DistributedCommandBus(commandRouter, commandBusConnector);
+	}
+
 }

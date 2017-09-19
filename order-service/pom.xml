@@ -107,6 +107,12 @@
 			<version>1.13-b01</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.axonframework</groupId>
+			<artifactId>axon-distributed-commandbus-springcloud</artifactId>
+			<version>3.0.6</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
