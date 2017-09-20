@@ -33,7 +33,7 @@ public class OrderController {
     }
 
     @PatchMapping("/test")
-    public String testCommand() {
+    public void testCommand() {
         LoggerFactory.getLogger("TEST").info("sending test command");
         commandGateway.send(new TestCommand("RandomName"));
     }
