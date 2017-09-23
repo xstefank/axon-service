@@ -10,7 +10,6 @@ import org.axonframework.commandhandling.distributed.CommandBusConnector;
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.DistributedCommandBus;
 import org.axonframework.common.transaction.TransactionManager;
-import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
@@ -57,12 +56,12 @@ public class ShipmentServiceApplication {
 		return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("*").noargs();
 	}
 
-	@Bean
-	public CommandBus commandBus(TransactionManager transactionManager) {
-		SimpleCommandBus simpleCommandBus = new SimpleCommandBus();
-		simpleCommandBus.registerDispatchInterceptor(new TransactionDispatchInterceptor<>(transactionManager));
-		return simpleCommandBus;
-	}
+//	@Bean
+//	public CommandBus commandBus(TransactionManager transactionManager) {
+//		SimpleCommandBus simpleCommandBus = new SimpleCommandBus();
+//		simpleCommandBus.registerDispatchInterceptor(new TransactionDispatchInterceptor<>(transactionManager));
+//		return simpleCommandBus;
+//	}
 
 	@Autowired
 	public void configure(AmqpAdmin admin) {
