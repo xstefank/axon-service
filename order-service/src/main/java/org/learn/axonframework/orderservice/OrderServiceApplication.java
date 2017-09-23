@@ -18,6 +18,8 @@ import org.axonframework.eventhandling.saga.repository.SagaStore;
 import org.axonframework.messaging.annotation.ParameterResolverFactory;
 import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
+import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
+import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.learn.axonframework.orderservice.saga.OrderManagementSaga;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
@@ -108,7 +110,7 @@ public class OrderServiceApplication {
 
 	//spring cloud settings - distributed command bus
 	// Example function providing a Spring Cloud Connector
-	/*@Bean
+	@Bean
 	public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
 		return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());
 	}
@@ -125,6 +127,6 @@ public class OrderServiceApplication {
 	public DistributedCommandBus springCloudDistributedCommandBus(CommandRouter commandRouter,
 																  CommandBusConnector commandBusConnector) {
 		return new DistributedCommandBus(commandRouter, commandBusConnector);
-	}*/
+	}
 
 }
