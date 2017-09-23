@@ -1,36 +1,12 @@
-axon:
-  eventhandling:
-    processors:
-      amqpEvents:
-        source: orderEvents
-
-  amqp:
-    exchange: ShipmentEvents
-
-  distributed:
-    enabled: true
-
-# H2DB
-spring:
-  datasource:
-    url: jdbc:h2:file:~/workspace/orderDB;DB_CLOSE_ON_EXIT=FALSE
-    username: test
-    password: test
-    driverClassName: org.h2.Driver
-
-  application:
-     name: order-service
-
-  cloud:
-    services:
-      registrationMethod: route
-
-# Discovery Server Access
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${vcap.services.eureka-service.credentials.uri:http://127.0.0.1:8761}/eureka/
 
-# HTTP Server
-server:
-  port: 8080
+---
+spring:
+  profiles: cloud
+eureka:
+  instance:
+    hostname: ${APPLICATION_DOMAIN}
+    nonSecurePort: 80

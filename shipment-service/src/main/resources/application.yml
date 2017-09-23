@@ -1,0 +1,32 @@
+axon:
+  eventhandling:
+    processors:
+      amqpEvents:
+        source: shipmentEvents
+
+  amqp:
+    exchange: OrderEvents
+
+  distributed:
+    enabled: true
+
+# H2DB
+spring:
+  datasource:
+    url: jdbc:h2:file:~/workspace/shipmentDB;DB_CLOSE_ON_EXIT=FALSE
+    username: test
+    password: test
+    driverClassName: org.h2.Driver
+
+  application:
+     name: order-service
+
+# Discovery Server Access
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1111/eureka/
+
+# HTTP Server
+server:
+  port: 2223   # HTTP (Tomcat) port

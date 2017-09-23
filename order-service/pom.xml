@@ -31,7 +31,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Brixton.SR1</version>
+				<version>Dalston.SR3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -87,34 +87,26 @@
 			<artifactId>axon-test</artifactId>
 			<version>${version.axon}</version>
 		</dependency>
+
+		<!--<dependency>-->
+			<!--<groupId>org.axonframework</groupId>-->
+			<!--<artifactId>axon-distributed-commandbus-springcloud</artifactId>-->
+			<!--<version>3.0.6</version>-->
+		<!--</dependency>-->
+
 		<dependency>
-			<!-- Setup Spring Boot -->
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
 		<dependency>
-			<!-- Setup Spring MVC & REST, use Embedded Tomcat -->
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Spring Cloud starter -->
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter</artifactId>
-		</dependency>
-
-		<dependency>
-			<!-- Eureka for service registration -->
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-eureka</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.axonframework</groupId>
-			<artifactId>axon-distributed-commandbus-springcloud</artifactId>
-			<version>3.0.6</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 	</dependencies>
