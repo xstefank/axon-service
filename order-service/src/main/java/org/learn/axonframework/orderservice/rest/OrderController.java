@@ -8,6 +8,7 @@ import org.learn.axonframework.util.LoggingCallback;
 import org.learn.axonframework.util.Util;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +33,7 @@ public class OrderController {
         return "Order posted - " + orderId;
     }
 
-    @PatchMapping("/test")
+    @GetMapping("/test")
     public void testCommand() {
         LoggerFactory.getLogger("TEST").info("sending test command");
         commandGateway.send(new TestCommand("RandomName"));

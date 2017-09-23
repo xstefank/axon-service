@@ -42,8 +42,9 @@ public class Shipment {
     }
 
     @CommandHandler
-    public void handle(TestCommand command) {
+    public Shipment(TestCommand command) {
         LoggerFactory.getLogger("TEST").info("received test command - " + command.getName());
+        apply(new ShipmentPreparedEvent("mySuperID", "mySuperOrderId", 100));
     }
 
     @EventSourcingHandler

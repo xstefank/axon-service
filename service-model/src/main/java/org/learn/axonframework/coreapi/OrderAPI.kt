@@ -15,4 +15,4 @@ class OrderFiledEvent(val orderId: String, val productInfo : ProductInfo)
 
 class InvoiceCreatedEvent(val invoiceId : String, val orderId: String)
 
-class TestCommand(val name: String)
+class TestCommand(@TargetAggregateIdentifier val name: String)
