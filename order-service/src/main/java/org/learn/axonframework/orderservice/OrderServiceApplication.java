@@ -21,6 +21,7 @@ import org.axonframework.serialization.Serializer;
 import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.learn.axonframework.orderservice.saga.OrderManagementSaga;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -53,54 +54,34 @@ public class OrderServiceApplication {
 	}
 
 	@Bean
-	public Exchange shipmentExchange() {
-		return ExchangeBuilder.fanoutExchange("ShipmentEvents").durable(true).build();
-	}
-
-	@Bean
-	public Queue shipmentQueue() {
-		return QueueBuilder.durable("ShipmentEvents").build();
-	}
-
-	@Bean
-	public Binding shipmentBinding() {
-		return BindingBuilder.bind(shipmentQueue()).to(shipmentExchange()).with("*").noargs();
-	}
-
-	@Autowired
-	public void configure(AmqpAdmin admin) {
-		admin.declareExchange(shipmentExchange());
-		admin.declareQueue(shipmentQueue());
-		admin.declareBinding(shipmentBinding());
-	}
-
-	@Bean
 	public SpringAMQPMessageSource orderEvents(Serializer serializer) {
 		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
 			@RabbitListener(queues = "OrderEvents")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
+				LoggerFactory.getLogger("TEST").info("received message - " + message);
+				Thread.sleep(2000);
 				super.onMessage(message, channel);
 			}
 		};
 	}
 
 	//the manual registration of saga event subscription because of processing events from AMQP queue
-//	@Autowired
-//	@SuppressWarnings("unchecked")
-//	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
-//	{
-//		String simpleName = OrderManagementSaga.class.getSimpleName();
-//
-//		AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
-//		AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
-//
-//		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
-//		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
-//		this.subscribingEventProcessor.start();
-//		System.out.println("subscribingEventProcessor STARTED");
-//	}
+	@Autowired
+	@SuppressWarnings("unchecked")
+	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
+	{
+		String simpleName = OrderManagementSaga.class.getSimpleName();
+
+		AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
+		AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
+
+		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
+		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+		this.subscribingEventProcessor.start();
+		System.out.println("subscribingEventProcessor STARTED");
+	}
 
 	@PreDestroy
 	public void destroy()

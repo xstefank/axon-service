@@ -70,19 +70,6 @@ public class ShipmentServiceApplication {
 		admin.declareBinding(orderBinding());
 	}
 
-	@Bean
-	public SpringAMQPMessageSource shipmentEvents(Serializer serializer) {
-		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
-
-			@RabbitListener(queues = "ShipmentEvents")
-			@Override
-			public void onMessage(Message message, Channel channel) throws Exception {
-//				LoggerFactory.getLogger("AMQP").info("received message " + message);
-				super.onMessage(message, channel);
-			}
-		};
-	}
-
 	//spring cloud settings - distributed command bus
 	// Example function providing a Spring Cloud Connector
 	@Bean

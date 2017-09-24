@@ -36,6 +36,7 @@ public class OrderManagementSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void on(ShipmentPreparedEvent event) {
         log.info("on ShipmentPreparedEvent");
+
     }
 
 }

@@ -7,6 +7,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
+import org.learn.axonframework.util.Util;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
@@ -39,7 +40,7 @@ public class Shipment {
     @CommandHandler
     public Shipment(PrepareShipmentCommand command) {
         LoggerFactory.getLogger("TEST").info("received test command - " + command.getOrderId());
-        apply(new ShipmentPreparedEvent("mySuperID", command.getOrderId(), 100));
+        apply(new ShipmentPreparedEvent(Util.generateId(), command.getOrderId(), 100));
     }
 
     @EventSourcingHandler

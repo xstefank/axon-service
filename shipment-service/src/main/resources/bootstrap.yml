@@ -14,11 +14,6 @@ server:
   port: 8081   # HTTP (Tomcat) port
 
 axon:
-  eventhandling:
-    processors:
-      amqpEvents:
-        source: shipmentEvents
-
   amqp:
     exchange: OrderEvents
 
