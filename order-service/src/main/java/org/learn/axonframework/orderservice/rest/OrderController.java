@@ -3,13 +3,11 @@ package org.learn.axonframework.orderservice.rest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.learn.axonframework.coreapi.FileOrderCommand;
 import org.learn.axonframework.coreapi.ProductInfo;
-import org.learn.axonframework.coreapi.TestCommand;
 import org.learn.axonframework.util.LoggingCallback;
 import org.learn.axonframework.util.Util;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +34,6 @@ public class OrderController {
     @GetMapping("/test")
     public void testCommand() {
         LoggerFactory.getLogger("TEST").info("sending test command");
-        commandGateway.send(new TestCommand("RandomName"));
+//        commandGateway.send(new RequestShipmentCommand("7d9162cb-9782-4a00-sdf-470f282cc0d5", new ProductInfo("", "", 2)));
     }
 }

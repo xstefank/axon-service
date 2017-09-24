@@ -77,7 +77,7 @@ public class ShipmentServiceApplication {
 			@RabbitListener(queues = "ShipmentEvents")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
-				LoggerFactory.getLogger("AMQP").info("received message " + message);
+//				LoggerFactory.getLogger("AMQP").info("received message " + message);
 				super.onMessage(message, channel);
 			}
 		};

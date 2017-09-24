@@ -5,8 +5,8 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.learn.axonframework.coreapi.PrepareShipmentCommand;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
-import org.learn.axonframework.coreapi.TestCommand;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
@@ -20,9 +20,9 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 public class Shipment {
 
     @Id
-    @AggregateIdentifier
     private String id;
 
+    @AggregateIdentifier
     private String orderId;
 
     private String productName;
@@ -38,18 +38,15 @@ public class Shipment {
 
     @CommandHandler
     public Shipment(PrepareShipmentCommand command) {
-        apply(new ShipmentPreparedEvent(command.getId(), command.getOrderId(), command.getPrice()));
-    }
-
-    @CommandHandler
-    public Shipment(TestCommand command) {
-        LoggerFactory.getLogger("TEST").info("received test command - " + command.getName());
-        apply(new ShipmentPreparedEvent("mySuperID", "mySuperOrderId", 100));
+        LoggerFactory.getLogger("TEST").info("received test command - " + command.getOrderId());
+        apply(new ShipmentPreparedEvent("mySuperID", command.getOrderId(), 100));
     }
 
     @EventSourcingHandler
     public void on(ShipmentPreparedEvent event) {
         this.id = event.getShipmentId();
+        this.orderId = event.getOrderId();
+        this.price = event.getPrice();
     }
 
     public String getId() {

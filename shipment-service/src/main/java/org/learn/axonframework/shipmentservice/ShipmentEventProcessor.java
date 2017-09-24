@@ -2,22 +2,12 @@ package org.learn.axonframework.shipmentservice;
 
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.EventBus;
-import org.axonframework.eventhandling.GenericEventMessage;
-import org.axonframework.messaging.MetaData;
-import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
-import org.learn.axonframework.shipmentservice.model.PrepareShipmentCommand;
-import org.learn.axonframework.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @RestController
 @Transactional
@@ -41,7 +31,8 @@ public class ShipmentEventProcessor {
 
     @PostMapping
     public void whatever() {
-        commandGateway.send(new PrepareShipmentCommand(Util.generateId(), "7d9162cb-9782-4a00-b67a-470f282cc0d5", 20));
+        System.out.println("sending testing command");
+//        commandGateway.send(new RequestShipmentCommand("7d9162cb-9782-4a00-b67a-470f282cc0d5", new ProductInfo()));
     }
 
 

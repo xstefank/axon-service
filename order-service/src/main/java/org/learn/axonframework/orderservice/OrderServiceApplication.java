@@ -87,20 +87,20 @@ public class OrderServiceApplication {
 	}
 
 	//the manual registration of saga event subscription because of processing events from AMQP queue
-	@Autowired
-	@SuppressWarnings("unchecked")
-	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
-	{
-		String simpleName = OrderManagementSaga.class.getSimpleName();
-
-		AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
-		AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
-
-		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
-		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
-		this.subscribingEventProcessor.start();
-		System.out.println("subscribingEventProcessor STARTED");
-	}
+//	@Autowired
+//	@SuppressWarnings("unchecked")
+//	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
+//	{
+//		String simpleName = OrderManagementSaga.class.getSimpleName();
+//
+//		AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
+//		AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
+//
+//		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
+//		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+//		this.subscribingEventProcessor.start();
+//		System.out.println("subscribingEventProcessor STARTED");
+//	}
 
 	@PreDestroy
 	public void destroy()
