@@ -6,16 +6,19 @@ import org.axonframework.eventhandling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
-import org.learn.axonframework.coreapi.ProductInfo;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.axonframework.eventhandling.saga.SagaLifecycle.end;
+
 @Saga
 public class OrderManagementSaga {
 
     private static final Logger log = LoggerFactory.getLogger(OrderManagementSaga.class.getSimpleName());
+
+    private final OrderProcessing orderProcessing = new OrderProcessing();
 
     @Autowired
     private transient CommandGateway commandGateway;
@@ -31,10 +34,46 @@ public class OrderManagementSaga {
 
     }
 
+    private static void endSaga() {
+        end();
+    }
+
     @SagaEventHandler(associationProperty = "orderId")
     public void on(ShipmentPreparedEvent event) {
         log.info("on ShipmentPreparedEvent");
+        orderProcessing.setShipmentProcessed(true);
+    }
 
+    private static class OrderProcessing {
+
+        private boolean shipmentProcessed;
+        private boolean invoiceProcessed;
+
+        public OrderProcessing() {
+        }
+
+        public boolean isShipmentProcessed() {
+            return shipmentProcessed;
+        }
+
+        public void setShipmentProcessed(boolean shipmentProcessed) {
+            this.shipmentProcessed = shipmentProcessed;
+            checkProcessingDone();
+        }
+
+        private void checkProcessingDone() {
+            if (shipmentProcessed && invoiceProcessed) {
+                endSaga();
+            }
+        }
+
+        public boolean isInvoiceProcessed() {
+            return invoiceProcessed;
+        }
+
+        public void setInvoiceProcessed(boolean invoiceProcessed) {
+            this.invoiceProcessed = invoiceProcessed;
+        }
     }
 
 }
