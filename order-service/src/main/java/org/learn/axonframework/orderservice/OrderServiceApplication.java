@@ -61,7 +61,7 @@ public class OrderServiceApplication {
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				LoggerFactory.getLogger("TEST").info("received message - " + message);
-				Thread.sleep(2000);
+				Thread.sleep(200);
 				super.onMessage(message, channel);
 			}
 		};
@@ -90,7 +90,6 @@ public class OrderServiceApplication {
 	}
 
 	//spring cloud settings - distributed command bus
-	// Example function providing a Spring Cloud Connector
 	@Bean
 	public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
 		return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());

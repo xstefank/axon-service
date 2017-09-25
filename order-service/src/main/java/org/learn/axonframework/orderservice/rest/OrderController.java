@@ -31,9 +31,4 @@ public class OrderController {
         return "Order posted - " + orderId;
     }
 
-    @GetMapping("/test")
-    public void testCommand() {
-        LoggerFactory.getLogger("TEST").info("sending test command");
-//        commandGateway.send(new RequestShipmentCommand("7d9162cb-9782-4a00-sdf-470f282cc0d5", new ProductInfo("", "", 2)));
-    }
 }

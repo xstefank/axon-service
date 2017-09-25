@@ -26,11 +26,9 @@ public class OrderManagementSaga {
 
         //request shipment
         log.info("sending RequestShipmentCommand");
-        commandGateway.send(new PrepareShipmentCommand(event.getOrderId(), new ProductInfo()));
+        commandGateway.send(new PrepareShipmentCommand(event.getOrderId(), event.getProductInfo()));
 
-        //create invoice
-//        commandGateway.send(new CreateInvoiceCommand(event.getOrderId(), event.getProductId(),
-//                event.getComment()), LoggingCallback.INSTANCE);
+
     }
 
     @SagaEventHandler(associationProperty = "orderId")

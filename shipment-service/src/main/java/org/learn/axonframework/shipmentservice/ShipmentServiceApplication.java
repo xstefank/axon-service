@@ -56,13 +56,6 @@ public class ShipmentServiceApplication {
 		return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("*").noargs();
 	}
 
-//	@Bean
-//	public CommandBus commandBus(TransactionManager transactionManager) {
-//		SimpleCommandBus simpleCommandBus = new SimpleCommandBus();
-//		simpleCommandBus.registerDispatchInterceptor(new TransactionDispatchInterceptor<>(transactionManager));
-//		return simpleCommandBus;
-//	}
-
 	@Autowired
 	public void configure(AmqpAdmin admin) {
 		admin.declareExchange(orderExchange());
@@ -71,7 +64,6 @@ public class ShipmentServiceApplication {
 	}
 
 	//spring cloud settings - distributed command bus
-	// Example function providing a Spring Cloud Connector
 	@Bean
 	public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
 		return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());

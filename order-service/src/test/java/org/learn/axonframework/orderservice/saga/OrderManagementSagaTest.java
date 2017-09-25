@@ -4,6 +4,7 @@ import org.axonframework.test.saga.SagaTestFixture;
 import org.junit.Before;
 import org.junit.Test;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
+import org.learn.axonframework.coreapi.PrepareShipmentCommand;
 import org.learn.axonframework.coreapi.ProductInfo;
 
 public class OrderManagementSagaTest {
@@ -25,13 +26,13 @@ public class OrderManagementSagaTest {
         fixture.givenNoPriorActivity()
                 .whenPublishingA(new OrderFiledEvent(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)))
                 .expectActiveSagas(1)
-                .expectDispatchedCommands(new RequestShipmentCommand(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)));
+                .expectDispatchedCommands(new PrepareShipmentCommand(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)));
     }
 
     @Test
     public void testShipmentRequested() {
         fixture.givenAPublished(new OrderFiledEvent(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)))
-                .whenPublishingA(new RequestShipmentCommand(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)))
+                .whenPublishingA(new PrepareShipmentCommand(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)))
                 .expectNoScheduledEvents()
                 .expectNoDispatchedCommands();
     }
