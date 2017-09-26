@@ -30,7 +30,7 @@ public class OrderManagementSaga {
         //request shipment
         log.info("sending RequestShipmentCommand");
         commandGateway.send(new PrepareShipmentCommand(event.getOrderId(), event.getProductInfo()));
-
+        
 
     }
 
