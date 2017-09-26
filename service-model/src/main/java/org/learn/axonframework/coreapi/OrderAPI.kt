@@ -14,3 +14,9 @@ class OrderFiledEvent(val orderId: String, val productInfo : ProductInfo)
 class PrepareShipmentCommand(@TargetAggregateIdentifier val orderId: String, val productInfo: ProductInfo)
 
 class ShipmentPreparedEvent(val shipmentId: String, val orderId: String, val price: Int)
+
+
+class PrepareInvoiceCommand(@TargetAggregateIdentifier val orderId: String, val productInfo: ProductInfo)
+
+class InvoicePreparedEvent(val invoiceId: String, val orderId: String, val invoice: String)
+

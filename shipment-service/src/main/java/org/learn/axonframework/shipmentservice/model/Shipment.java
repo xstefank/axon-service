@@ -8,6 +8,7 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
 import org.learn.axonframework.util.Util;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
@@ -19,6 +20,8 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 @Entity
 @Aggregate
 public class Shipment {
+
+    private static final Logger log = LoggerFactory.getLogger(Shipment.class);
 
     @Id
     private String id;
@@ -39,8 +42,13 @@ public class Shipment {
 
     @CommandHandler
     public Shipment(PrepareShipmentCommand command) {
-        LoggerFactory.getLogger("TEST").info("received test command - " + command.getOrderId());
-        apply(new ShipmentPreparedEvent(Util.generateId(), command.getOrderId(), 100));
+        log.info("received PrepareShipmentCommand command for order: " + command.getOrderId());
+        String id = Util.generateId();
+
+        //compute shipment
+        int shipment = 100;
+
+        apply(new ShipmentPreparedEvent(id, command.getOrderId(), shipment));
     }
 
     @EventSourcingHandler
