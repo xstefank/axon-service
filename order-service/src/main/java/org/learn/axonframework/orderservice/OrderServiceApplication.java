@@ -60,8 +60,8 @@ public class OrderServiceApplication {
 			@RabbitListener(queues = "OrderEvents")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
-				LoggerFactory.getLogger("TEST").info("received message - " + message);
-				Thread.sleep(200);
+				//necessary because message is not delivered to saga otherwise
+				Thread.sleep(1000);
 				super.onMessage(message, channel);
 			}
 		};
