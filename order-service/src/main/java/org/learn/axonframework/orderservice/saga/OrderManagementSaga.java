@@ -26,6 +26,7 @@ public class OrderManagementSaga {
     private static final Logger log = LoggerFactory.getLogger(OrderManagementSaga.class.getSimpleName());
 
     private final OrderProcessing orderProcessing = new OrderProcessing();
+    private final OrderCompensationProcessing compensationProcessing = new OrderCompensationProcessing();
 
     @Autowired
     private transient CommandGateway commandGateway;
@@ -93,7 +94,7 @@ public class OrderManagementSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void on(ShipmentCompensatedEvent event) {
         log.info("on ShipmentCompensatedEvent");
-        orderProcessing.compensateShipment();
+        compensationProcessing.setShipmentCompensated(true);
 
         checkSagaCompensated();
     }
@@ -101,13 +102,13 @@ public class OrderManagementSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void on(InvoiceCompensatedEvent event) {
         log.info("on InvoiceCompensatedEvent");
-        orderProcessing.compensateInvoice();
+        compensationProcessing.setInvoiceCompensated(true);
 
         checkSagaCompensated();
     }
 
     private void checkSagaCompensated() {
-        if (orderProcessing.isCompensated()) {
+        if (compensationProcessing.isCompensated()) {
             log.info("saga fully compensated");
             endSaga();
         }
@@ -134,28 +135,27 @@ public class OrderManagementSaga {
             this.invoiceProcessed = invoiceProcessed;
         }
 
-        public void compensateShipment() {
-            shipmentProcessed = false;
-        }
-
-        public void compensateInvoice() {
-            invoiceProcessed = false;
-        }
-
-        public boolean isInvoiceProcessed() {
-            return invoiceProcessed;
-        }
-
-        public boolean isShipmentProcessed() {
-            return shipmentProcessed;
-        }
-
         public boolean isDone() {
             return shipmentProcessed && invoiceProcessed;
         }
 
+    }
+
+    private static class OrderCompensationProcessing {
+
+        private boolean shipmentCompensated;
+        private boolean invoiceCompensated;
+
+        public void setShipmentCompensated(boolean shipmentCompensated) {
+            this.shipmentCompensated = shipmentCompensated;
+        }
+
+        public void setInvoiceCompensated(boolean invoiceCompensated) {
+            this.invoiceCompensated = invoiceCompensated;
+        }
+
         public boolean isCompensated() {
-            return !shipmentProcessed && !invoiceProcessed;
+            return shipmentCompensated && invoiceCompensated;
         }
     }
 

@@ -41,3 +41,10 @@ After the Spring Cloud sends the heartbeats to all service (need to boot up Axon
 
 `curl -X POST -H "Content-Type: application/json" -d '{"productId":"testProduct", "comment":"testComment", "price":"20"}' localhost:8080`
 
+For the compensation scenario you can run:
+
+`curl -X POST -H "Content-Type: application/json" -d '{"productId":"fail-saga", "comment":"testComment", "price":"20"}' localhost:8080`
+
+
+
+

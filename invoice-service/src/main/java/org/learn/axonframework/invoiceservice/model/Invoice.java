@@ -8,6 +8,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.learn.axonframework.coreapi.CompensateInvoiceCommand;
 import org.learn.axonframework.coreapi.InvoiceCompensatedEvent;
+import org.learn.axonframework.coreapi.InvoicePreparationFailedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparedEvent;
 import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.util.Util;
@@ -33,10 +34,16 @@ public class Invoice {
         log.info("received PrepareInvoiceCommand command for order: " + command.getOrderId());
         String id = Util.generateId();
 
-        //generate invoice
-        String invoice = generateInvoice();
+        //simulate saga compensation
+        if (command.getProductInfo().getProductId().equals("fail-saga")) {
+            log.info("failing invoice");
+            apply(new InvoicePreparationFailedEvent(id, command.getOrderId(), "simulated saga fail"));
+        } else {
+            //generate invoice
+            String invoice = generateInvoice();
 
-        apply(new InvoicePreparedEvent(id, command.getOrderId(), invoice));
+            apply(new InvoicePreparedEvent(id, command.getOrderId(), invoice));
+        }
     }
 
     private String generateInvoice() {
@@ -52,6 +59,12 @@ public class Invoice {
 
     @EventSourcingHandler
     public void on(InvoicePreparedEvent event) {
+        this.id = event.getInvoiceId();
+        this.orderId = event.getOrderId();
+    }
+
+    @EventSourcingHandler
+    public void on(InvoicePreparationFailedEvent event) {
         this.id = event.getInvoiceId();
         this.orderId = event.getOrderId();
     }

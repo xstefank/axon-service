@@ -45,7 +45,7 @@ public class OrderManagementSagaTest {
     @Test
     public void testCompensation() {
         fixture.givenAPublished(new OrderFiledEvent(ORDER1_ID, new ProductInfo(ORDER1_PRODUCT_ID, ORDER1_COMMENT, ORDER1_PRICE)))
-                .whenPublishingA(new InvoicePreparationFailedEvent(ORDER1_ID, "cause"))
+                .whenPublishingA(new InvoicePreparationFailedEvent("1234", ORDER1_ID, "cause"))
                 .expectDispatchedCommands(new CompensateShipmentCommand(ORDER1_ID, "cause"),
                         new CompensateInvoiceCommand(ORDER1_ID, "cause"));
     }
