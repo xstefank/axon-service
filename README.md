@@ -8,6 +8,13 @@ example application using [Axon framework](http://www.axonframework.org/) with d
 
 The project consists of three microservices connected throuch spring cloud Eureka server for command dispatching and throuch AMQP queue for event handling.
 
+1. install service-model jar into local maven repository
+    * `cd service-model`
+    * `mvn clean install`
+
+1. download and start rabbitmq for your operating system
+    * sudo systemctl start rabbitmq-server.service
+
 1. run the Eureka registration server
     * `cd registration-server`
     * `mvn clean package exec:java`

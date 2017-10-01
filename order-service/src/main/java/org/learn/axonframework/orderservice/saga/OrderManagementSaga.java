@@ -33,7 +33,7 @@ public class OrderManagementSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void on(OrderFiledEvent event) {
-        log.info("STARTING SAGA");
+        log.info("STARTING SAGA - " + event.getOrderId());
 
         //request shipment
         log.info("sending PrepareShipmentCommand");

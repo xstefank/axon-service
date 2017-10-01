@@ -6,6 +6,8 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.model.AggregateIdentifier;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.learn.axonframework.coreapi.CompensateInvoiceCommand;
+import org.learn.axonframework.coreapi.InvoiceCompensatedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparedEvent;
 import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.util.Util;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
+import static org.axonframework.commandhandling.model.AggregateLifecycle.markDeleted;
 
 @NoArgsConstructor
 @Aggregate
@@ -38,6 +41,13 @@ public class Invoice {
 
     private String generateInvoice() {
         return "This is just the invoice stub";
+    }
+
+    @CommandHandler
+    public void handle(CompensateInvoiceCommand command) {
+        log.info("received CompensateInvoiceCommand command");
+        markDeleted();
+        apply(new InvoiceCompensatedEvent(id, orderId, command.getCause()));
     }
 
     @EventSourcingHandler
