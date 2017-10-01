@@ -5,10 +5,16 @@ import org.axonframework.eventhandling.saga.EndSaga;
 import org.axonframework.eventhandling.saga.SagaEventHandler;
 import org.axonframework.eventhandling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
+import org.learn.axonframework.coreapi.CompensateInvoiceCommand;
+import org.learn.axonframework.coreapi.CompensateShipmentCommand;
+import org.learn.axonframework.coreapi.InvoiceCompensatedEvent;
+import org.learn.axonframework.coreapi.InvoicePreparationFailedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparedEvent;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
+import org.learn.axonframework.coreapi.ShipmentCompensatedEvent;
+import org.learn.axonframework.coreapi.ShipmentPreparationFailedEvent;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +63,52 @@ public class OrderManagementSaga {
 
     private void checkSagaCompleted() {
         if (orderProcessing.isDone()) {
+            log.info("saga executed successfully");
+            endSaga();
+        }
+    }
+
+    //compensations
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void on(ShipmentPreparationFailedEvent event) {
+        log.info("on ShipmentPreparationFailedEvent");
+
+        compensateSaga(event.getOrderId(), event.getCause());
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void on(InvoicePreparationFailedEvent event) {
+        log.info("on InvoicePreparationFailedEvent");
+
+        compensateSaga(event.getOrderId(), event.getCause());
+    }
+
+    private void compensateSaga(String orderId, String cause) {
+        log.info(String.format("compensation of saga for order [%s] with casuse - %s", orderId, cause));
+        commandGateway.send(new CompensateShipmentCommand(orderId, cause));
+        commandGateway.send(new CompensateInvoiceCommand(orderId, cause));
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void on(ShipmentCompensatedEvent event) {
+        log.info("on ShipmentCompensatedEvent");
+        orderProcessing.compensateShipment();
+
+        checkSagaCompensated();
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void on(InvoiceCompensatedEvent event) {
+        log.info("on InvoiceCompensatedEvent");
+        orderProcessing.compensateInvoice();
+
+        checkSagaCompensated();
+    }
+
+    private void checkSagaCompensated() {
+        if (orderProcessing.isCompensated()) {
+            log.info("saga fully compensated");
             endSaga();
         }
     }
@@ -82,6 +134,14 @@ public class OrderManagementSaga {
             this.invoiceProcessed = invoiceProcessed;
         }
 
+        public void compensateShipment() {
+            shipmentProcessed = false;
+        }
+
+        public void compensateInvoice() {
+            invoiceProcessed = false;
+        }
+
         public boolean isInvoiceProcessed() {
             return invoiceProcessed;
         }
@@ -92,6 +152,10 @@ public class OrderManagementSaga {
 
         public boolean isDone() {
             return shipmentProcessed && invoiceProcessed;
+        }
+
+        public boolean isCompensated() {
+            return !shipmentProcessed && !invoiceProcessed;
         }
     }
 
