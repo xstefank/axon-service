@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: query-service
+
+  #H2DB
+  datasource:
+    url: jdbc:h2:file:~/workspace/queryDB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+    username: test
+    password: test
+    driverClassName: org.h2.Driver
+
+# HTTP Server
+server:
+  port: 8083   # HTTP (Tomcat) port
+
+axon:
+  eventhandling:
+    processors:
+      amqpEvents:
+        source: queryEvents
+
+
