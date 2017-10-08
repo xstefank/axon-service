@@ -22,7 +22,7 @@ public class QueryServiceApplication {
 	public SpringAMQPMessageSource queryEvents(Serializer serializer) {
 		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
-			@RabbitListener(queues = "OrderEvents")
+			@RabbitListener(queues = "QueryQueue")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				//necessary because message is not delivered to saga otherwise

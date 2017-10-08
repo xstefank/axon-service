@@ -13,6 +13,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeBuilder;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,25 +35,55 @@ public class ShipmentServiceApplication {
 	}
 
 	@Bean
-	public Exchange orderExchange() {
-		return ExchangeBuilder.fanoutExchange("OrderEvents").durable(true).build();
+	public Exchange shipmentExchange() {
+		return ExchangeBuilder.fanoutExchange("ShipmentEvents").durable(true).build();
 	}
+
+
+	// order AMQP queue
+
+//	@Bean
+//	public Exchange orderExchange() {
+//		return ExchangeBuilder.shipmentExchange("OrderEvents").durable(true).build();
+//	}
 
 	@Bean
 	public Queue orderQueue() {
-		return QueueBuilder.durable("OrderEvents").build();
+		return QueueBuilder.durable("OrderQueue").build();
 	}
 
 	@Bean
 	public Binding orderBinding() {
-		return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("*").noargs();
+		return BindingBuilder.bind(orderQueue()).to(shipmentExchange()).with("*").noargs();
+	}
+
+	// query AMQP queue
+
+//	@Bean
+//	public Exchange queryExchange() {
+//		return ExchangeBuilder.shipmentExchange("QueryEvents").durable(true).build();
+//	}
+
+	@Bean
+	public Queue queryQueue() {
+		return QueueBuilder.durable("QueryQueue").build();
+	}
+
+	@Bean
+	public Binding queryBinding() {
+		return BindingBuilder.bind(queryQueue()).to(shipmentExchange()).with("*").noargs();
 	}
 
 	@Autowired
 	public void configure(AmqpAdmin admin) {
-		admin.declareExchange(orderExchange());
+		admin.declareExchange(shipmentExchange());
+		admin.declareQueue(queryQueue());
+		admin.declareBinding(queryBinding());
+
 		admin.declareQueue(orderQueue());
 		admin.declareBinding(orderBinding());
+
+
 	}
 
 	//spring cloud settings - distributed command bus

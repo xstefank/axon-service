@@ -4,7 +4,7 @@ spring:
 
   #H2DB
   datasource:
-    url: jdbc:h2:file:~/workspace/shipmentDB;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:~/workspace/shipmentDB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
     username: test
     password: test
     driverClassName: org.h2.Driver
@@ -15,7 +15,7 @@ server:
 
 axon:
   amqp:
-    exchange: OrderEvents
+    exchange: ShipmentEvents
 
   distributed:
     enabled: true

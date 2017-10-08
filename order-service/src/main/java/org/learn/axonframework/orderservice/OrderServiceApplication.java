@@ -57,7 +57,7 @@ public class OrderServiceApplication {
 	public SpringAMQPMessageSource orderEvents(Serializer serializer) {
 		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
-			@RabbitListener(queues = "OrderEvents")
+			@RabbitListener(queues = {"OrderEvents", "OrderQueue"})
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				//necessary because message is not delivered to saga otherwise
