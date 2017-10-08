@@ -34,25 +34,43 @@ public class InvoiceServiceApplication {
 	}
 
 	@Bean
-	public Exchange orderExchange() {
-		return ExchangeBuilder.fanoutExchange("OrderEvents").durable(true).build();
+	public Exchange invoiceExchange() {
+		return ExchangeBuilder.fanoutExchange("InvoiceEvents").durable(true).build();
 	}
+
+	// order AMQP queue
 
 	@Bean
 	public Queue orderQueue() {
-		return QueueBuilder.durable("OrderEvents").build();
+		return QueueBuilder.durable("OrderQueue").build();
 	}
 
 	@Bean
 	public Binding orderBinding() {
-		return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("*").noargs();
+		return BindingBuilder.bind(orderQueue()).to(invoiceExchange()).with("*").noargs();
+	}
+
+	// query AMQP queue
+
+	@Bean
+	public Queue queryQueue() {
+		return QueueBuilder.durable("QueryQueue").build();
+	}
+
+	@Bean
+	public Binding queryBinding() {
+		return BindingBuilder.bind(queryQueue()).to(invoiceExchange()).with("*").noargs();
 	}
 
 	@Autowired
 	public void configure(AmqpAdmin admin) {
-		admin.declareExchange(orderExchange());
+		admin.declareExchange(invoiceExchange());
+
 		admin.declareQueue(orderQueue());
 		admin.declareBinding(orderBinding());
+
+		admin.declareQueue(queryQueue());
+		admin.declareBinding(queryBinding());
 	}
 
 	//spring cloud settings - distributed command bus

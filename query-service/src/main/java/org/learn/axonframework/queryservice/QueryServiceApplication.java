@@ -26,7 +26,7 @@ public class QueryServiceApplication {
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				//necessary because message is not delivered to saga otherwise
-				LoggerFactory.getLogger(QueryServiceApplication.class).info("message - " + message.toString());
+				LoggerFactory.getLogger(QueryServiceApplication.class).info("message - ");
 				Thread.sleep(1000);
 				super.onMessage(message, channel);
 			}

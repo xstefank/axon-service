@@ -54,10 +54,26 @@ public class OrderServiceApplication {
 	}
 
 	@Bean
+	public Exchange orderExchange() {
+		return ExchangeBuilder.fanoutExchange("OrderEvents").durable(true).build();
+	}
+
+	@Bean
+	public Queue queryQueue() {
+		return QueueBuilder.durable("QueryQueue").build();
+	}
+
+	@Bean
+	public Binding queryBinding() {
+		return BindingBuilder.bind(queryQueue()).to(orderExchange()).with("*").noargs();
+	}
+
+
+	@Bean
 	public SpringAMQPMessageSource orderEvents(Serializer serializer) {
 		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
-			@RabbitListener(queues = {"OrderEvents", "OrderQueue"})
+			@RabbitListener(queues = "OrderQueue")
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				//necessary because message is not delivered to saga otherwise

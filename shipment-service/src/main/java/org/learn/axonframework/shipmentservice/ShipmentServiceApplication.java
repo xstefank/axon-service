@@ -39,13 +39,7 @@ public class ShipmentServiceApplication {
 		return ExchangeBuilder.fanoutExchange("ShipmentEvents").durable(true).build();
 	}
 
-
 	// order AMQP queue
-
-//	@Bean
-//	public Exchange orderExchange() {
-//		return ExchangeBuilder.shipmentExchange("OrderEvents").durable(true).build();
-//	}
 
 	@Bean
 	public Queue orderQueue() {
@@ -58,11 +52,6 @@ public class ShipmentServiceApplication {
 	}
 
 	// query AMQP queue
-
-//	@Bean
-//	public Exchange queryExchange() {
-//		return ExchangeBuilder.shipmentExchange("QueryEvents").durable(true).build();
-//	}
 
 	@Bean
 	public Queue queryQueue() {
@@ -77,12 +66,12 @@ public class ShipmentServiceApplication {
 	@Autowired
 	public void configure(AmqpAdmin admin) {
 		admin.declareExchange(shipmentExchange());
-		admin.declareQueue(queryQueue());
-		admin.declareBinding(queryBinding());
 
 		admin.declareQueue(orderQueue());
 		admin.declareBinding(orderBinding());
 
+		admin.declareQueue(queryQueue());
+		admin.declareBinding(queryBinding());
 
 	}
 

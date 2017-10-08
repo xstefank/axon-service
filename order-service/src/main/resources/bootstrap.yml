@@ -15,6 +15,9 @@ axon:
       amqpEvents:
         source: orderEvents
 
+  amqp:
+    exchange: OrderEvents
+
   distributed:
     enabled: true
 
