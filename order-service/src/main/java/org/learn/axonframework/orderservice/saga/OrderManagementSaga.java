@@ -13,12 +13,16 @@ import org.learn.axonframework.coreapi.InvoicePreparedEvent;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
+import org.learn.axonframework.coreapi.ProductInfo;
 import org.learn.axonframework.coreapi.ShipmentCompensatedEvent;
 import org.learn.axonframework.coreapi.ShipmentPreparationFailedEvent;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
+import org.learn.axonframework.orderservice.command.OrderCompletedCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @Saga
 public class OrderManagementSaga {
@@ -28,6 +32,9 @@ public class OrderManagementSaga {
     private final OrderProcessing orderProcessing = new OrderProcessing();
     private final OrderCompensationProcessing compensationProcessing = new OrderCompensationProcessing();
 
+    private String orderId;
+    private ProductInfo productInfo;
+
     @Autowired
     private transient CommandGateway commandGateway;
 
@@ -36,13 +43,16 @@ public class OrderManagementSaga {
     public void on(OrderFiledEvent event) {
         log.info("STARTING SAGA - " + event.getOrderId());
 
+        orderId = event.getOrderId();
+        productInfo = event.getProductInfo();
+
         //request shipment
         log.info("sending PrepareShipmentCommand");
-        commandGateway.send(new PrepareShipmentCommand(event.getOrderId(), event.getProductInfo()));
+        commandGateway.send(new PrepareShipmentCommand(orderId, productInfo));
 
         //request invoice
         log.info("sending PrepareInvoiceCommand");
-        commandGateway.send(new PrepareInvoiceCommand(event.getOrderId(), event.getProductInfo()));
+        commandGateway.send(new PrepareInvoiceCommand(orderId, productInfo));
 
     }
 
@@ -66,6 +76,7 @@ public class OrderManagementSaga {
         if (orderProcessing.isDone()) {
             log.info("saga executed successfully");
             endSaga();
+            commandGateway.send(new OrderCompletedCommand(orderId, productInfo));
         }
     }
 
