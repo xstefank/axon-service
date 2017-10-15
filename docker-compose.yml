@@ -1,0 +1,49 @@
+
+version: "2.1"
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  registration-server:
+    build: ./registration-server
+    ports:
+      - "8761:8761"
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_SERVER=registration-server
+      - RABBITMQ_HOST=rabbitmq
+
+  shipment-service:
+    build: ./shipment-service
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_SERVER=registration-server
+      - RABBITMQ_HOST=rabbitmq
+
+  invoice-service:
+    build: ./invoice-service
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_SERVER=registration-server
+      - RABBITMQ_HOST=rabbitmq
+
+  query-service:
+    build: ./query-service
+    ports:
+      - "8083:8083"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+
+
+
+

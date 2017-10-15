@@ -9,6 +9,12 @@ spring:
     password: test
     driverClassName: org.h2.Driver
 
+  rabbitmq:
+    user: guest
+    password: guest
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: 5672
+
 axon:
   eventhandling:
     processors:
