@@ -3,9 +3,9 @@ package org.learn.axonframework.orderservice.order;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.Before;
 import org.junit.Test;
-import org.learn.axonframework.coreapi.FileOrderCommand;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.ProductInfo;
+import org.learn.axonframework.orderservice.command.FileOrderCommand;
 
 public class OrderTest {
 
