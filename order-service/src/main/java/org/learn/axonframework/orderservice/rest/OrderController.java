@@ -24,7 +24,7 @@ public class OrderController {
 
         commandGateway.send(new FileOrderCommand(orderId, productInfo), LoggingCallback.INSTANCE);
 
-        return "Order posted - " + orderId;
+        return "OrderAggregate posted - " + orderId;
     }
 
 }

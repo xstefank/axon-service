@@ -97,7 +97,7 @@ public class OrderManagementSaga {
     }
 
     private void compensateSaga(String orderId, String cause) {
-        log.info(String.format("compensation of saga for order [%s] with casuse - %s", orderId, cause));
+        log.info(String.format("compensation of saga for model [%s] with casuse - %s", orderId, cause));
         commandGateway.send(new CompensateShipmentCommand(orderId, cause));
         commandGateway.send(new CompensateInvoiceCommand(orderId, cause));
     }

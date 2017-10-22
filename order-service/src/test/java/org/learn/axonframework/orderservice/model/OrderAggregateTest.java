@@ -1,4 +1,4 @@
-package org.learn.axonframework.orderservice.order;
+package org.learn.axonframework.orderservice.model;
 
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.Before;
@@ -7,18 +7,18 @@ import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.ProductInfo;
 import org.learn.axonframework.orderservice.command.FileOrderCommand;
 
-public class OrderTest {
+public class OrderAggregateTest {
 
     private static final String ORDER1_ID = "1234";
     private static final String ORDER1_PRODUCT_ID = "testProduct";
     private static final String ORDER1_COMMENT = "testComment";
     private static final int ORDER1_PRICE = 100;
 
-    private AggregateTestFixture<Order> fixture;
+    private AggregateTestFixture<OrderAggregate> fixture;
 
     @Before
     public void setUp() {
-        fixture = new AggregateTestFixture<>(Order.class);
+        fixture = new AggregateTestFixture<>(OrderAggregate.class);
     }
 
     @Test

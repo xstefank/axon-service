@@ -1,4 +1,4 @@
-package org.learn.axonframework.orderservice.order;
+package org.learn.axonframework.orderservice.model;
 
 import lombok.NoArgsConstructor;
 import org.axonframework.commandhandling.CommandHandler;
@@ -14,7 +14,7 @@ import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @NoArgsConstructor
 @Aggregate
-public class Order {
+public class OrderAggregate {
 
     @AggregateIdentifier
     private String orderId;
@@ -22,7 +22,7 @@ public class Order {
     private boolean completed;
 
     @CommandHandler
-    public Order(FileOrderCommand command) {
+    public OrderAggregate(FileOrderCommand command) {
         apply(new OrderFiledEvent(command.getOrderId(), command.getProductInfo()));
     }
 

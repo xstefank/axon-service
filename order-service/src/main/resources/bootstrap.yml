@@ -1,6 +1,6 @@
 spring:
   application:
-    name: order-service
+    name: model-service
 
   #H2DB
   datasource:
