@@ -18,7 +18,7 @@ public class OrderController {
     @Autowired
     private CommandGateway commandGateway;
 
-    @PostMapping
+    @PostMapping("/order")
     public String createOrder(@RequestBody ProductInfo productInfo) {
         String orderId = Util.generateId();
 

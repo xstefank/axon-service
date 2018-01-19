@@ -11,7 +11,7 @@ import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
 import org.learn.axonframework.coreapi.ProductInfo;
 
-public class OrderAggregateManagementSagaTest {
+public class OrderManagementSagaTest {
 
     private static final String ORDER1_ID = "1234";
     private static final String ORDER1_PRODUCT_ID = "testProduct";
