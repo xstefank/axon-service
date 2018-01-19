@@ -13,7 +13,12 @@ The project consists of three microservices connected throuch spring cloud Eurek
     * `mvn clean install`
 
 1. download and start rabbitmq for your operating system
-    * sudo systemctl start rabbitmq-server.service
+    * `sudo systemctl start rabbitmq-server.service`
+    
+1. download and start H2 database
+    * http://www.h2database.com/html/download.html
+    * `cd H2_HOME && chmod +x bin/h2.sh && bin/h2.sh -webPort 8083`
+        * NOTE: by default H2 runs on the port 8082 which is used for invoice-service
 
 1. run the Eureka registration server
     * `cd registration-server`
@@ -39,11 +44,11 @@ You should see the registration of the services in registration-server log or yo
 
 After the Spring Cloud sends the heartbeats to all service (need to boot up Axon's distributed command bus) you can test the application by issuing request for order, e.g:
 
-`curl -X POST -H "Content-Type: application/json" -d '{"productId":"testProduct", "comment":"testComment", "price":"20"}' localhost:8080`
+`curl -X POST -H "Content-Type: application/json" -d '{"productId":"testProduct", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
 
 For the compensation scenario you can run:
 
-`curl -X POST -H "Content-Type: application/json" -d '{"productId":"fail-saga", "comment":"testComment", "price":"20"}' localhost:8080`
+`curl -X POST -H "Content-Type: application/json" -d '{"productId":"fail-saga", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
 
 
 
