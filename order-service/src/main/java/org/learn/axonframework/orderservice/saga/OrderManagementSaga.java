@@ -29,6 +29,7 @@ public class OrderManagementSaga {
 
     private final OrderProcessing orderProcessing = new OrderProcessing();
     private final OrderCompensationProcessing compensationProcessing = new OrderCompensationProcessing();
+    private boolean compensating = false;
 
     private String orderId;
     private ProductInfo productInfo;
@@ -56,18 +57,22 @@ public class OrderManagementSaga {
 
     @SagaEventHandler(associationProperty = "orderId")
     public void on(ShipmentPreparedEvent event) {
-        log.info("on ShipmentPreparedEvent");
-        orderProcessing.setShipmentProcessed(true);
+        if (!compensating) {
+            log.info("on ShipmentPreparedEvent");
+            orderProcessing.setShipmentProcessed(true);
 
-        checkSagaCompleted();
+            checkSagaCompleted();
+        }
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void on(InvoicePreparedEvent event) {
-        log.info("on InvoicePreparedEvent");
-        orderProcessing.setInvoiceProcessed(true);
+        if (!compensating) {
+            log.info("on InvoicePreparedEvent");
+            orderProcessing.setInvoiceProcessed(true);
 
-        checkSagaCompleted();
+            checkSagaCompleted();
+        }
     }
 
     private void checkSagaCompleted() {
@@ -96,6 +101,8 @@ public class OrderManagementSaga {
 
     private void compensateSaga(String orderId, String cause) {
         log.info(String.format("compensation of saga for model [%s] with casuse - %s", orderId, cause));
+
+        compensating = true;
         commandGateway.send(new CompensateShipmentCommand(orderId, cause));
         commandGateway.send(new CompensateInvoiceCommand(orderId, cause));
     }

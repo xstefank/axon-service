@@ -34,9 +34,9 @@ public class Invoice {
         log.info("received PrepareInvoiceCommand command for order: " + command.getOrderId());
         String id = Util.generateId();
 
-        //simulate saga compensation
-        if (command.getProductInfo().getProductId().equals("fail-saga")) {
-            log.info("failing invoice");
+        if (command.getProductInfo().getProductId().equals("failInvoice")) {
+            //simulate saga compensation
+            log.info("failing invoice creation");
             apply(new InvoicePreparationFailedEvent(id, command.getOrderId(), "simulated saga fail"));
         } else {
             //generate invoice

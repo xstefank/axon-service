@@ -7,7 +7,9 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.learn.axonframework.coreapi.CompensateShipmentCommand;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
+import org.learn.axonframework.coreapi.ProductInfo;
 import org.learn.axonframework.coreapi.ShipmentCompensatedEvent;
+import org.learn.axonframework.coreapi.ShipmentPreparationFailedEvent;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
 import org.learn.axonframework.util.Util;
 import org.slf4j.Logger;
@@ -48,10 +50,22 @@ public class Shipment {
         log.info("received PrepareShipmentCommand command for order: " + command.getOrderId());
         String id = Util.generateId();
 
-        //compute shipment
-        int shipment = 100;
+        if (command.getProductInfo().getProductId().equals("failShipment")) {
+            //simulate saga compensation
+            log.info("failing shipment creation");
+            apply(new ShipmentPreparationFailedEvent(id, command.getOrderId(), "simulated saga fail"));
+        } else {
+            //generate invoice
+            int shipment = computeShipment(command.getProductInfo());
 
-        apply(new ShipmentPreparedEvent(id, command.getOrderId(), shipment));
+            apply(new ShipmentPreparedEvent(id, command.getOrderId(), shipment));
+        }
+
+    }
+
+    private int computeShipment(ProductInfo productInfo) {
+        // testing stub
+        return 42;
     }
 
     @CommandHandler
@@ -67,6 +81,12 @@ public class Shipment {
         this.id = event.getShipmentId();
         this.orderId = event.getOrderId();
         this.price = event.getPrice();
+    }
+
+    @EventSourcingHandler
+    public void on(ShipmentPreparationFailedEvent event) {
+        this.id = event.getShipmentId();
+        this.orderId = event.getOrderId();
     }
 
     public String getId() {
