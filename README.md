@@ -6,6 +6,21 @@ example application using [Axon framework](http://www.axonframework.org/) with d
 
 ## Build and running
 
+### Docker compose
+
+the esasiest way to run this application:
+
+1. build
+    * `mvn clean install`
+
+1. start
+    * `docker-compose up -d --build`
+    
+1. stop
+    * `docker-compose down --remove-orphans`
+
+### Manual start
+
 The project consists of three microservices connected throuch spring cloud Eureka server for command dispatching and throuch AMQP queue for event handling.
 
 1. install service-model jar into local maven repository
@@ -42,7 +57,8 @@ The project consists of three microservices connected throuch spring cloud Eurek
     
 You should see the registration of the services in registration-server log or you can go to [localhost:8761](http://localhost:8761) to check that all services are registered.
 
-After the Spring Cloud sends the heartbeats to all service (need to boot up Axon's distributed command bus) you can test the application by issuing request for order, e.g:
+After the Spring Cloud sends the heartbeats to all service (need to boot up Axon's distributed command bus) you can test the application by issuing request for order
+
 
 `curl -X POST -H "Content-Type: application/json" -d '{"productId":"testProduct", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
 
