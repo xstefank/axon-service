@@ -60,11 +60,20 @@ You should see the registration of the services in registration-server log or yo
 After the Spring Cloud sends the heartbeats to all service (need to boot up Axon's distributed command bus) you can test the application by issuing request for order
 
 
+## Testing
+
+After all of the services are registered with the registration-server you can test the example with:
+
 `curl -X POST -H "Content-Type: application/json" -d '{"productId":"testProduct", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
 
 For the compensation scenario you can run:
 
-`curl -X POST -H "Content-Type: application/json" -d '{"productId":"fail-saga", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
+`curl -X POST -H "Content-Type: application/json" -d '{"productId":"failShipment", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
+
+or 
+
+`curl -X POST -H "Content-Type: application/json" -d '{"productId":"failInvoice", "comment":"testComment", "price":"20"}' http://localhost:8080/order`
+
 
 
 
