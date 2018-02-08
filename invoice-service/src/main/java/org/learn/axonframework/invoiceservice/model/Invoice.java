@@ -30,7 +30,7 @@ public class Invoice {
     private String orderId;
 
     @CommandHandler
-    public Invoice(PrepareInvoiceCommand command) {
+    public Invoice(PrepareInvoiceCommand command) throws InterruptedException {
         log.info("received PrepareInvoiceCommand command for order: " + command.getOrderId());
         String id = Util.generateId();
 
@@ -39,6 +39,10 @@ public class Invoice {
             log.info("failing invoice creation");
             apply(new InvoicePreparationFailedEvent(id, command.getOrderId(), "simulated saga fail"));
         } else {
+            if (command.getProductInfo().getProductId().equals("delayInvoice")) {
+                Thread.sleep(30000);
+            }
+
             //generate invoice
             String invoice = generateInvoice();
 

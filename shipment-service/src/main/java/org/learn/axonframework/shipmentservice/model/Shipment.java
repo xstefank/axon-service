@@ -46,7 +46,7 @@ public class Shipment {
     }
 
     @CommandHandler
-    public Shipment(PrepareShipmentCommand command) {
+    public Shipment(PrepareShipmentCommand command) throws InterruptedException {
         log.info("received PrepareShipmentCommand command for order: " + command.getOrderId());
         String id = Util.generateId();
 
@@ -55,6 +55,10 @@ public class Shipment {
             log.info("failing shipment creation");
             apply(new ShipmentPreparationFailedEvent(id, command.getOrderId(), "simulated saga fail"));
         } else {
+            if (command.getProductInfo().getProductId().equals("delayShipment")) {
+                Thread.sleep(30000);
+            }
+
             //generate invoice
             int shipment = computeShipment(command.getProductInfo());
 
