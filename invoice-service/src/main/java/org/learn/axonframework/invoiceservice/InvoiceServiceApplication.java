@@ -1,10 +1,14 @@
 package org.learn.axonframework.invoiceservice;
 
+import org.axonframework.commandhandling.AsynchronousCommandBus;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.distributed.AnnotationRoutingStrategy;
 import org.axonframework.commandhandling.distributed.CommandBusConnector;
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.DistributedCommandBus;
+import org.axonframework.common.transaction.TransactionManager;
+import org.axonframework.messaging.interceptors.BeanValidationInterceptor;
+import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
@@ -91,5 +95,15 @@ public class InvoiceServiceApplication {
 	public DistributedCommandBus springCloudDistributedCommandBus(CommandRouter commandRouter,
 																  CommandBusConnector commandBusConnector) {
 		return new DistributedCommandBus(commandRouter, commandBusConnector);
+	}
+
+	@Bean(destroyMethod = "shutdown")
+	@Qualifier("localSegment")
+	public CommandBus localSegment(TransactionManager transactionManager) {
+		AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
+		asynchronousCommandBus.registerDispatchInterceptor(new BeanValidationInterceptor<>());
+		asynchronousCommandBus.registerHandlerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+
+		return asynchronousCommandBus;
 	}
 }

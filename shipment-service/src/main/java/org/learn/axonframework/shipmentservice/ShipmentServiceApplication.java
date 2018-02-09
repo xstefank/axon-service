@@ -98,4 +98,14 @@ public class ShipmentServiceApplication {
 																  CommandBusConnector commandBusConnector) {
 		return new DistributedCommandBus(commandRouter, commandBusConnector);
 	}
+
+	@Bean(destroyMethod = "shutdown")
+	@Qualifier("localSegment")
+	public CommandBus localSegment(TransactionManager transactionManager) {
+		AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
+		asynchronousCommandBus.registerDispatchInterceptor(new BeanValidationInterceptor<>());
+		asynchronousCommandBus.registerHandlerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+
+		return asynchronousCommandBus;
+	}
 }

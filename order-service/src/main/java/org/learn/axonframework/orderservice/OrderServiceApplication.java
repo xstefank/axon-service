@@ -12,6 +12,7 @@ import org.axonframework.commandhandling.distributed.DistributedCommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.CommandGatewayFactory;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.axonframework.commandhandling.gateway.IntervalRetryScheduler;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
 import org.axonframework.eventhandling.saga.AnnotatedSagaManager;
@@ -48,6 +49,8 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PreDestroy;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @EnableDiscoveryClient
 @SpringBootApplication
@@ -137,7 +140,7 @@ public class OrderServiceApplication {
 		return new DistributedCommandBus(commandRouter, commandBusConnector);
 	}
 
-	@Bean
+	@Bean(destroyMethod = "shutdown")
 	@Qualifier("localSegment")
 	public CommandBus localSegment(TransactionManager transactionManager) {
 		AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
@@ -146,6 +149,5 @@ public class OrderServiceApplication {
 
 		return asynchronousCommandBus;
 	}
-
 
 }
