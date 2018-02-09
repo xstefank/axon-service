@@ -3,11 +3,15 @@ package org.learn.axonframework.orderservice;
 import com.rabbitmq.client.Channel;
 import org.axonframework.amqp.eventhandling.DefaultAMQPMessageConverter;
 import org.axonframework.amqp.eventhandling.spring.SpringAMQPMessageSource;
+import org.axonframework.commandhandling.AsynchronousCommandBus;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.distributed.AnnotationRoutingStrategy;
 import org.axonframework.commandhandling.distributed.CommandBusConnector;
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.DistributedCommandBus;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.commandhandling.gateway.CommandGatewayFactory;
+import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
 import org.axonframework.eventhandling.saga.AnnotatedSagaManager;
@@ -15,8 +19,10 @@ import org.axonframework.eventhandling.saga.ResourceInjector;
 import org.axonframework.eventhandling.saga.repository.AnnotatedSagaRepository;
 import org.axonframework.eventhandling.saga.repository.SagaStore;
 import org.axonframework.messaging.annotation.ParameterResolverFactory;
+import org.axonframework.messaging.interceptors.BeanValidationInterceptor;
 import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
+import org.axonframework.spring.commandhandling.gateway.CommandGatewayFactoryBean;
 import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.learn.axonframework.orderservice.saga.OrderManagementSaga;
@@ -39,6 +45,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PreDestroy;
 
@@ -112,6 +119,11 @@ public class OrderServiceApplication {
 	}
 
 	@Bean
+	public RestOperations restTemplate() {
+		return new RestTemplate();
+	}
+
+	@Bean
 	public CommandBusConnector springHttpCommandBusConnector(@Qualifier("localSegment") CommandBus localSegment,
 															 RestOperations restOperations,
 															 Serializer serializer) {
@@ -124,5 +136,16 @@ public class OrderServiceApplication {
 																  CommandBusConnector commandBusConnector) {
 		return new DistributedCommandBus(commandRouter, commandBusConnector);
 	}
+
+	@Bean
+	@Qualifier("localSegment")
+	public CommandBus localSegment(TransactionManager transactionManager) {
+		AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
+		asynchronousCommandBus.registerDispatchInterceptor(new BeanValidationInterceptor<>());
+		asynchronousCommandBus.registerHandlerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+
+		return asynchronousCommandBus;
+	}
+
 
 }

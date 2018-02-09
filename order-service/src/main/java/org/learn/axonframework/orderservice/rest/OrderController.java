@@ -13,10 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.logging.Logger;
+
 @RestController
 @RequestMapping("/api")
 @SuppressWarnings(value = "unchecked")
 public class OrderController {
+
+    private static final Logger log = Logger.getLogger(OrderController.class.getName());
 
     @Autowired
     private CommandGateway commandGateway;
@@ -25,7 +29,9 @@ public class OrderController {
     public String createOrder(@RequestBody ProductInfo productInfo) {
         String orderId = Util.generateId();
 
+        log.info("before command");
         commandGateway.send(new FileOrderCommand(orderId, productInfo));
+        log.info("after command");
 
         return "OrderAggregate posted - " + orderId;
     }
