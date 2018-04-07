@@ -87,7 +87,7 @@ public class OrderServiceApplication {
 			@Override
 			public void onMessage(Message message, Channel channel) throws Exception {
 				//necessary because message is not delivered to saga otherwise
-				Thread.sleep(1000);
+				Thread.sleep(50);
 				super.onMessage(message, channel);
 			}
 		};
