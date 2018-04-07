@@ -61,4 +61,10 @@ public class QueryController {
         Invoice invoice = invoiceRepository.findOne(invoiceId);
         return invoice != null ? ResponseEntity.ok(invoice) : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+
+    @GetMapping("/performance/clearorders")
+    public String clearOrders() {
+        orderRepository.deleteAll();
+        return "Order cleared";
+    }
 }
