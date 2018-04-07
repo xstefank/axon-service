@@ -28,7 +28,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 @EnableDiscoveryClient
 @SpringBootApplication
@@ -46,36 +45,36 @@ public class ShipmentServiceApplication {
 	// order AMQP queue
 
 	@Bean
-	public Queue orderQueue() {
-		return QueueBuilder.durable("OrderQueue").build();
+	public Queue orderShipmentQueue() {
+		return QueueBuilder.durable("OrderShipmentQueue").build();
 	}
 
 	@Bean
-	public Binding orderBinding() {
-		return BindingBuilder.bind(orderQueue()).to(shipmentExchange()).with("*").noargs();
+	public Binding orderShipmentBinding() {
+		return BindingBuilder.bind(orderShipmentQueue()).to(shipmentExchange()).with("*").noargs();
 	}
 
 	// query AMQP queue
 
 	@Bean
-	public Queue queryQueue() {
-		return QueueBuilder.durable("QueryQueue").build();
+	public Queue queryShipmentQueue() {
+		return QueueBuilder.durable("QueryShipmentQueue").build();
 	}
 
 	@Bean
-	public Binding queryBinding() {
-		return BindingBuilder.bind(queryQueue()).to(shipmentExchange()).with("*").noargs();
+	public Binding queryShipmentBinding() {
+		return BindingBuilder.bind(queryShipmentQueue()).to(shipmentExchange()).with("*").noargs();
 	}
 
 	@Autowired
 	public void configure(AmqpAdmin admin) {
 		admin.declareExchange(shipmentExchange());
 
-		admin.declareQueue(orderQueue());
-		admin.declareBinding(orderBinding());
+		admin.declareQueue(orderShipmentQueue());
+		admin.declareBinding(orderShipmentBinding());
 
-		admin.declareQueue(queryQueue());
-		admin.declareBinding(queryBinding());
+		admin.declareQueue(queryShipmentQueue());
+		admin.declareBinding(queryShipmentBinding());
 
 	}
 

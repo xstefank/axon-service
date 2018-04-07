@@ -9,10 +9,6 @@ import org.axonframework.commandhandling.distributed.AnnotationRoutingStrategy;
 import org.axonframework.commandhandling.distributed.CommandBusConnector;
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.DistributedCommandBus;
-import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.axonframework.commandhandling.gateway.CommandGatewayFactory;
-import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
-import org.axonframework.commandhandling.gateway.IntervalRetryScheduler;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.SubscribingEventProcessor;
 import org.axonframework.eventhandling.saga.AnnotatedSagaManager;
@@ -23,11 +19,11 @@ import org.axonframework.messaging.annotation.ParameterResolverFactory;
 import org.axonframework.messaging.interceptors.BeanValidationInterceptor;
 import org.axonframework.messaging.interceptors.TransactionManagingInterceptor;
 import org.axonframework.serialization.Serializer;
-import org.axonframework.spring.commandhandling.gateway.CommandGatewayFactoryBean;
 import org.axonframework.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.learn.axonframework.orderservice.saga.OrderManagementSaga;
 import org.learn.axonframework.orderservice.swagger.SwaggerConfiguration;
+import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Exchange;
@@ -49,105 +45,143 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PreDestroy;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 @EnableDiscoveryClient
 @SpringBootApplication
 @Import(SwaggerConfiguration.class)
 public class OrderServiceApplication {
 
-	private SubscribingEventProcessor subscribingEventProcessor;
+    private SubscribingEventProcessor shipmentSubscribingEventProcessor;
+    private SubscribingEventProcessor invoiceSubscribingEventProcessor;
 
-	public static void main(String[] args) {
-		SpringApplication.run(OrderServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(OrderServiceApplication.class, args);
+    }
 
-	@Bean
-	public Exchange orderExchange() {
-		return ExchangeBuilder.fanoutExchange("OrderEvents").durable(true).build();
-	}
+    @Bean
+    public Exchange orderExchange() {
+        return ExchangeBuilder.fanoutExchange("OrderEvents").durable(true).build();
+    }
 
-	@Bean
-	public Queue queryQueue() {
-		return QueueBuilder.durable("QueryQueue").build();
-	}
+    @Bean
+    public Queue queryOrderQueue() {
+        return QueueBuilder.durable("QueryOrderQueue").build();
+    }
 
-	@Bean
-	public Binding queryBinding() {
-		return BindingBuilder.bind(queryQueue()).to(orderExchange()).with("*").noargs();
-	}
+    @Bean
+    public Binding queryOrderBinding() {
+        return BindingBuilder.bind(queryOrderQueue()).to(orderExchange()).with("*").noargs();
+    }
 
 
-	@Bean
-	public SpringAMQPMessageSource orderEvents(Serializer serializer) {
-		return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
+    @Bean
+    @Qualifier("orderShipmentEvents")
+    public SpringAMQPMessageSource orderShipmentEvents(Serializer serializer) {
+        return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
-			@RabbitListener(queues = "OrderQueue")
-			@Override
-			public void onMessage(Message message, Channel channel) throws Exception {
-				//necessary because message is not delivered to saga otherwise
-				Thread.sleep(50);
-				super.onMessage(message, channel);
-			}
-		};
-	}
+            @RabbitListener(queues = "OrderShipmentQueue")
+            @Override
+            public void onMessage(Message message, Channel channel) throws Exception {
+                System.out.println("XXXXXXXX");
+                Thread.sleep(50);
+                super.onMessage(message, channel);
+            }
+        };
+    }
 
-	//the manual registration of saga event subscription because of processing events from AMQP queue
-	@Autowired
-	@SuppressWarnings("unchecked")
-	public void createSaga(SagaStore sagaStore, SpringAMQPMessageSource springAMQPMessageSource, ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager)
-	{
-		String simpleName = OrderManagementSaga.class.getSimpleName();
+    @Bean
+    @Qualifier("orderInvoiceEvents")
+    public SpringAMQPMessageSource orderInvoiceEvents(Serializer serializer) {
+        return new SpringAMQPMessageSource(new DefaultAMQPMessageConverter(serializer)) {
 
-		AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
-		AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
+            @RabbitListener(queues = "OrderInvoiceQueue")
+            @Override
+            public void onMessage(Message message, Channel channel) throws Exception {
+                System.out.println("YYYYYYYY");
+                Thread.sleep(50);
+                super.onMessage(message, channel);
+            }
+        };
+    }
 
-		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
-		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
-		this.subscribingEventProcessor.start();
-		System.out.println("subscribingEventProcessor STARTED");
-	}
+    @Autowired
+    public void configure(AmqpAdmin admin) {
+        admin.declareExchange(orderExchange());
 
-	@PreDestroy
-	public void destroy()
-	{
-		this.subscribingEventProcessor.shutDown();
-	}
+        admin.declareQueue(queryOrderQueue());
+        admin.declareBinding(queryOrderBinding());
+    }
 
-	//spring cloud settings - distributed command bus
-	@Bean
-	public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
-		return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());
-	}
+    //the manual registration of saga event subscription because of processing events from AMQP queue
+    @Autowired
+    @SuppressWarnings("unchecked")
+    public void registerShipmentEvents(SagaStore sagaStore, @Qualifier("orderShipmentEvents") SpringAMQPMessageSource springAMQPMessageSource,
+                           ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager) {
+        String simpleName = OrderManagementSaga.class.getSimpleName();
 
-	@Bean
-	public RestOperations restTemplate() {
-		return new RestTemplate();
-	}
+        AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
+        AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
 
-	@Bean
-	public CommandBusConnector springHttpCommandBusConnector(@Qualifier("localSegment") CommandBus localSegment,
-															 RestOperations restOperations,
-															 Serializer serializer) {
-		return new SpringHttpCommandBusConnector(localSegment, restOperations, serializer);
-	}
+        shipmentSubscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
+        shipmentSubscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+        shipmentSubscribingEventProcessor.start();
+        System.out.println("shipmentSubscribingEventProcessor STARTED");
+    }
 
-	@Primary // to make sure this CommandBus implementation is used for autowiring
-	@Bean
-	public DistributedCommandBus springCloudDistributedCommandBus(CommandRouter commandRouter,
-																  CommandBusConnector commandBusConnector) {
-		return new DistributedCommandBus(commandRouter, commandBusConnector);
-	}
+    @Autowired
+    @SuppressWarnings("unchecked")
+    public void registerInvoiceEvents(SagaStore sagaStore, @Qualifier("orderInvoiceEvents") SpringAMQPMessageSource springAMQPMessageSource,
+                           ResourceInjector resourceInjector, ParameterResolverFactory parameterResolverFactory, TransactionManager transactionManager) {
+        String simpleName = OrderManagementSaga.class.getSimpleName();
 
-	@Bean(destroyMethod = "shutdown")
-	@Qualifier("localSegment")
-	public CommandBus localSegment(TransactionManager transactionManager) {
-		AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
-		asynchronousCommandBus.registerDispatchInterceptor(new BeanValidationInterceptor<>());
-		asynchronousCommandBus.registerHandlerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+        AnnotatedSagaRepository sagaRepository = new AnnotatedSagaRepository<>(OrderManagementSaga.class, sagaStore, resourceInjector, parameterResolverFactory);
+        AnnotatedSagaManager<OrderManagementSaga> sagaManager = new AnnotatedSagaManager<>(OrderManagementSaga.class, sagaRepository, parameterResolverFactory);
 
-		return asynchronousCommandBus;
-	}
+        invoiceSubscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
+        invoiceSubscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+        invoiceSubscribingEventProcessor.start();
+        System.out.println("invoiceSubscribingEventProcessor STARTED");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        shipmentSubscribingEventProcessor.shutDown();
+        invoiceSubscribingEventProcessor.shutDown();
+    }
+
+    //spring cloud settings - distributed command bus
+    @Bean
+    public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient) {
+        return new SpringCloudCommandRouter(discoveryClient, new AnnotationRoutingStrategy());
+    }
+
+    @Bean
+    public RestOperations restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    public CommandBusConnector springHttpCommandBusConnector(@Qualifier("localSegment") CommandBus localSegment,
+                                                             RestOperations restOperations,
+                                                             Serializer serializer) {
+        return new SpringHttpCommandBusConnector(localSegment, restOperations, serializer);
+    }
+
+    @Primary // to make sure this CommandBus implementation is used for autowiring
+    @Bean
+    public DistributedCommandBus springCloudDistributedCommandBus(CommandRouter commandRouter,
+                                                                  CommandBusConnector commandBusConnector) {
+        return new DistributedCommandBus(commandRouter, commandBusConnector);
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    @Qualifier("localSegment")
+    public CommandBus localSegment(TransactionManager transactionManager) {
+        AsynchronousCommandBus asynchronousCommandBus = new AsynchronousCommandBus();
+        asynchronousCommandBus.registerDispatchInterceptor(new BeanValidationInterceptor<>());
+        asynchronousCommandBus.registerHandlerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
+
+        return asynchronousCommandBus;
+    }
 
 }

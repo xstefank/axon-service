@@ -22,7 +22,11 @@ server:
 axon:
   eventhandling:
     processors:
-      amqpEvents:
-        source: queryEvents
+      orderEvents:
+        source: queryOrderEvents
+      shipmentEvents:
+        source: queryShipmentEvents
+      invoiceEvents:
+        source: queryInvoiceEvents
 
 
