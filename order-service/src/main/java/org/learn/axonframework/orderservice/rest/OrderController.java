@@ -29,9 +29,7 @@ public class OrderController {
     public String createOrder(@RequestBody ProductInfo productInfo) {
         String orderId = Util.generateId();
 
-        log.info("before command");
         commandGateway.send(new FileOrderCommand(orderId, productInfo));
-        log.info("after command");
 
         return "OrderAggregate posted - " + orderId;
     }

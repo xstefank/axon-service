@@ -106,7 +106,6 @@ public class OrderServiceApplication {
 		this.subscribingEventProcessor = new SubscribingEventProcessor(simpleName + "Processor", sagaManager, springAMQPMessageSource);
 		this.subscribingEventProcessor.registerInterceptor(new TransactionManagingInterceptor<>(transactionManager));
 		this.subscribingEventProcessor.start();
-		System.out.println("subscribingEventProcessor STARTED");
 	}
 
 	@PreDestroy
