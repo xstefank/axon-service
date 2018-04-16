@@ -49,12 +49,10 @@ public class OrderManagementSaga {
         //request shipment
         log.info("sending PrepareShipmentCommand");
         commandGateway.send(new PrepareShipmentCommand(orderId, productInfo));
-        log.info("PrepareShipmentCommand sent");
 
         //request invoice
         log.info("sending PrepareInvoiceCommand");
         commandGateway.send(new PrepareInvoiceCommand(orderId, productInfo));
-        log.info("PrepareInvoiceCommand sent");
 
     }
 
