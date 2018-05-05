@@ -46,7 +46,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @Import(SwaggerConfiguration.class)
 public class OrderServiceApplication {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(OrderServiceApplication.class, args);
     }

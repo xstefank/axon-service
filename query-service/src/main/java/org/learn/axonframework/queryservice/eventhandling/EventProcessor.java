@@ -2,9 +2,13 @@ package org.learn.axonframework.queryservice.eventhandling;
 
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.learn.axonframework.coreapi.InvoiceCompensatedEvent;
+import org.learn.axonframework.coreapi.InvoicePreparationFailedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparedEvent;
 import org.learn.axonframework.coreapi.OrderCompletedEvent;
 import org.learn.axonframework.coreapi.ProductInfo;
+import org.learn.axonframework.coreapi.ShipmentCompensatedEvent;
+import org.learn.axonframework.coreapi.ShipmentPreparationFailedEvent;
 import org.learn.axonframework.coreapi.ShipmentPreparedEvent;
 import org.learn.axonframework.queryservice.model.Invoice;
 import org.learn.axonframework.queryservice.model.Order;
@@ -20,6 +24,8 @@ import org.springframework.stereotype.Component;
 @ProcessingGroup("amqpEvents")
 @Component
 public class EventProcessor {
+
+    public static final String NOT_AVAILABLE = "N/A";
 
     private static final Logger log = LoggerFactory.getLogger(EventProcessor.class);
 
@@ -39,9 +45,37 @@ public class EventProcessor {
     }
 
     @EventHandler
+    public void on(ShipmentPreparationFailedEvent event) {
+        log.info("on ShipmentPreparationFailedEvent");
+        shipmentRepository.save(new Shipment(event.getShipmentId(), event.getOrderId(), -1));
+    }
+
+    @EventHandler
+    public void on(ShipmentCompensatedEvent event) {
+        log.info("on ShipmentCompensatedEvent");
+        Shipment shipment = shipmentRepository.findOne(event.getShipmentId());
+        shipment.setPrice(-1);
+        shipmentRepository.save(shipment);
+    }
+
+    @EventHandler
     public void on(InvoicePreparedEvent event) {
         log.info("on InvoicePreparedEvent");
         invoiceRepository.save(new Invoice(event.getInvoiceId(), event.getOrderId(), event.getInvoice()));
+    }
+
+    @EventHandler
+    public void on(InvoicePreparationFailedEvent event) {
+        log.info("on InvoicePreparationFailedEvent");
+        invoiceRepository.save(new Invoice(event.getInvoiceId(), event.getOrderId(), NOT_AVAILABLE));
+    }
+
+    @EventHandler
+    public void on(InvoiceCompensatedEvent event) {
+        log.info("on InvoiceCompensatedEvent");
+        Invoice invoice = invoiceRepository.findOne(event.getInvoiceId());
+        invoice.setInvoiceString(NOT_AVAILABLE);
+        invoiceRepository.save(invoice);
     }
 
     @EventHandler
