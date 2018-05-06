@@ -8,7 +8,6 @@ data class ProductInfo(val productId: String = "", val comment: String = "", val
 
 class OrderFiledEvent(val orderId: String, val productInfo : ProductInfo)
 class OrderCompletedEvent(val orderId: String, val productInfo: ProductInfo)
-class OrderCancelledEvent(val orderId: String)
 
 
 class PrepareShipmentCommand(@TargetAggregateIdentifier val orderId: String, val productInfo: ProductInfo)

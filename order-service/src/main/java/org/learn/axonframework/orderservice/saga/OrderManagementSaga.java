@@ -10,7 +10,6 @@ import org.learn.axonframework.coreapi.CompensateShipmentCommand;
 import org.learn.axonframework.coreapi.InvoiceCompensatedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparationFailedEvent;
 import org.learn.axonframework.coreapi.InvoicePreparedEvent;
-import org.learn.axonframework.coreapi.OrderCancelledEvent;
 import org.learn.axonframework.coreapi.OrderFiledEvent;
 import org.learn.axonframework.coreapi.PrepareInvoiceCommand;
 import org.learn.axonframework.coreapi.PrepareShipmentCommand;
@@ -82,12 +81,6 @@ public class OrderManagementSaga {
             endSaga();
             commandGateway.send(new OrderCompletedCommand(orderId, productInfo));
         }
-    }
-
-    @SagaEventHandler(associationProperty = "orderId")
-    public void on(OrderCancelledEvent event) {
-        log.info("cancelling the saga for order - " + orderId);
-        compensateSaga(orderId, "cancelled by user");
     }
 
     //compensations
